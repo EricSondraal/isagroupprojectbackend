@@ -1,0 +1,705 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+ const md5 = require('./md5');
+ //import { MD5 } from './md5.js';
+
+
+const express = require("express");
+const app = express();
+// const debug = require('debug')('isa-group-project:server');
+// const http = require('http');
+const mysql = require('mysql');
+const PORT = process.env.PORT || 3000;
+const endPointRoot = "/api/v1/";
+
+
+//consts
+const PUT = 'PUT';
+const POST = 'POST';
+const GET = 'GET';
+const DELETE = 'DELETE';
+const OPTIONS = 'OPTIONS';
+
+
+//call counters
+let createaccountCounter = 0;
+let deleteaccountCounter = 0;
+let loginaccountCounter = 0;
+let getcommentCounter = 0;
+let newcommentCounter = 0;
+let editcommentCounter = 0;
+let deletecommentCounter = 0;
+let adminlogCounter = 0;
+let usersCounter = 0;
+let postcountCounter = 0;
+
+
+let db;
+function startDB(){
+//database connection
+  db = mysql.createConnection({
+    host: 'us-cdbr-east-03.cleardb.com',
+    user:'bcf3f9b58a6dac',
+    password:'7cad6522',
+    database:'heroku_c67f7e6ff0b2115'
+  });
+}
+
+
+
+app.use(function(req,res,next){
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  next();
+});
+
+
+
+
+app.listen(PORT, (err)=>{
+  if (err) throw err;
+  console.log("Listening to port: ", PORT);
+});
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// USER ACCOUNT
+///////////////////////////////////////////////////////////////////////////////////////////
+
+//[POST] API/V1/createaccount
+app.post(endPointRoot+'createaccount', function (req, res) {
+  createaccountCounter++;
+
+  let body="";
+  req.on('data', function(chunk){
+    if(chunk != null){
+      body +=chunk;
+    //console.log(body);
+    }
+  });
+
+  req.on('end', function(){
+    let jsonBody = JSON.parse(body);
+
+    //check if the user account already exists
+    startDB();
+    const retrieveUserAccountQuery = "SELECT * FROM useraccounts WHERE name = '"+jsonBody.name+"'";
+    db.query(retrieveUserAccountQuery, (errUA,resultUA,fieldsUA)=>{
+      if (errUA) throw errUA;
+      console.log(retrieveUserAccountQuery);
+      
+      //only create a new account if one doesn't exist
+      let foundUserAccount=resultUA.length > 0;
+      if(!foundUserAccount){
+
+
+        startDB();
+        const insertUserAccountQuery = "INSERT INTO useraccounts (name, password) VALUES ('"+jsonBody.name +"','"+md5.MD5(jsonBody.password)+"')";
+        db.query(insertUserAccountQuery, (err,result)=>{
+          if (err) throw err;
+          //console.log("Record Inserted Into 'answers'");
+          console.log(insertUserAccountQuery);
+        });
+        endDB();
+
+        res.end('{"result":"success"}');
+      } else {
+        res.status(400);
+        res.end('{"result":"fail"}');
+      }
+    });
+
+    endDB();
+  });
+});
+
+
+
+
+
+//[DELETE] API/V1/deleteaccount
+app.delete(endPointRoot+'deleteaccount', function (req, res) {
+  deleteaccountCounter++;
+
+  let body="";
+  req.on('data', function(chunk){
+    if(chunk != null){
+      body +=chunk;
+    //console.log(body);
+    }
+  });
+
+  req.on('end', function(){
+    let jsonBody = JSON.parse(body);
+
+    //check if the user account actually exists AND the password is right
+    startDB();
+    const retrieveUserAccountQuery = "SELECT * FROM useraccounts WHERE name = '"+jsonBody.name+"' AND password = '"+md5.MD5(jsonBody.password)+"'";
+    db.query(retrieveUserAccountQuery, (errUA,resultUA,fieldsUA)=>{
+      if (errUA) throw errUA;
+      console.log(retrieveUserAccountQuery);
+      
+      //make sure an account was found
+      let foundUserAccount=resultUA.length > 0;
+      if(foundUserAccount){
+        let userAccountID = resultUA[0].id;
+
+        startDB();
+
+        //delete the posts from the user first
+        const deleteUserPostsQuery = "DELETE FROM userposts WHERE accountid = "+userAccountID;
+        db.query(deleteUserPostsQuery, (err,result)=>{
+          if (err) throw err;
+          console.log(deleteUserPostsQuery);
+        });
+
+        //delete the user account
+        const deleteUserAccountQuery = "DELETE FROM useraccounts WHERE id = "+userAccountID;
+        db.query(deleteUserAccountQuery, (err,result)=>{
+          if (err) throw err;
+          console.log(deleteUserAccountQuery);
+        });
+        endDB();
+
+        res.end('{"result":"success"}');
+      } else {
+        res.status(400);
+        res.end('{"result":"fail"}');
+      }
+    });
+
+    endDB();
+  });
+});
+
+
+
+//[POST] API/V1/loginaccount
+app.post(endPointRoot+'loginaccount', function (req, res) {
+  loginaccountCounter++;
+
+
+  let body="";
+  req.on('data', function(chunk){
+    if(chunk != null){
+      body +=chunk;
+    //console.log(body);
+    }
+  });
+
+  req.on('end', function(){
+    let jsonBody = JSON.parse(body);
+
+    //check if the user account actually exists AND the password is right
+    startDB();
+    const retrieveUserAccountQuery = "SELECT * FROM useraccounts WHERE name = '"+jsonBody.name+"' AND password = '"+md5.MD5(jsonBody.password)+"'";
+    db.query(retrieveUserAccountQuery, (errUA,resultUA,fieldsUA)=>{
+      if (errUA) throw errUA;
+      console.log(retrieveUserAccountQuery);
+      
+      //delete account if it exists AND the password is right
+      let foundUserAccount=resultUA.length > 0;
+      if(foundUserAccount){
+        res.status(400);
+        res.end('{"result":"success"}');
+      } else {
+        res.end('{"result":"fail"}');
+      }
+    });
+
+    endDB();
+  });
+});
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// USER POSTS
+///////////////////////////////////////////////////////////////////////////////////////////
+
+//[POST] API/V1/newcomment
+app.post(endPointRoot+'newcomment', function (req, res) {
+  newcommentCounter++;
+
+  let body="";
+  req.on('data', function(chunk){
+    if(chunk != null){
+      body +=chunk;
+    //console.log(body);
+    }
+  });
+
+  req.on('end', function(){
+    let jsonBody = JSON.parse(body);
+
+    //check if the user account exists that wants to post
+    startDB();
+    const retrieveUserAccountQuery = "SELECT * FROM useraccounts WHERE name = '"+jsonBody.name+"'";
+    db.query(retrieveUserAccountQuery, (errUA,resultUA,fieldsUA)=>{
+      if (errUA) throw errUA;
+      console.log(retrieveUserAccountQuery);
+      
+      //only post if the account exists
+      let foundUserAccount=resultUA.length > 0;
+      if(foundUserAccount){
+        //get the account id
+        let accountID = resultUA[0].id;
+
+        startDB();
+        const insertUserPostQuery = "INSERT INTO userposts (accountid, title, body) VALUES ('"+accountID +"','"+jsonBody.title +"','"+jsonBody.body+"')";
+        db.query(insertUserPostQuery, (err,result)=>{
+          if (err) throw err;
+          //console.log("Record Inserted Into 'answers'");
+          console.log(insertUserPostQuery);
+
+          res.end('{"result":"success"}');
+        });
+        endDB();
+
+      } else {
+        res.status(400);
+        res.end('{"result":"fail"}');
+      }
+    });
+
+    endDB();
+  });
+});
+
+
+
+//[PUT] API/V1/editcomment
+app.put(endPointRoot+'editcomment', function (req, res) {
+  editcommentCounter++;
+
+  let body="";
+  req.on('data', function(chunk){
+    if(chunk != null){
+      body +=chunk;
+    //console.log(body);
+    }
+  });
+
+  req.on('end', function(){
+    let jsonBody = JSON.parse(body);
+
+    //check if the user account exists that wants to edit a post
+    startDB();
+    const retrieveUserAccountQuery = "SELECT * FROM useraccounts WHERE name = '"+jsonBody.name+"'";
+    db.query(retrieveUserAccountQuery, (errUA,resultUA,fieldsUA)=>{
+      if (errUA) throw errUA;
+      console.log(retrieveUserAccountQuery);
+      
+      //only edit if the account exists
+      let foundUserAccount=resultUA.length > 0;
+      if(foundUserAccount){
+        //get the account id
+        let accountID = resultUA[0].id;
+
+
+        //get all of the posts that user has made
+        startDB();
+        const retrieveUserPostsQuery = "SELECT * FROM userposts WHERE accountid = '"+accountID+"'";
+        db.query(retrieveUserPostsQuery, (errUP,resultUP,fieldsUP)=>{
+          if (errUP) throw errUP;
+          console.log(retrieveUserPostsQuery);
+
+          //check if the post exists
+          if(jsonBody.postnumber<resultUP.length)
+          {
+            let editPostID = resultUP[jsonBody.postnumber].id;
+
+            startDB();
+            const updateUserPostQuery = "UPDATE userposts SET title='"+jsonBody.title+"', body='"+ jsonBody.body+"' WHERE id="+editPostID;
+            db.query(updateUserPostQuery, (err,result)=>{
+              if (err) throw err;
+              //console.log("Record Inserted Into 'answers'");
+              console.log(updateUserPostQuery);
+
+              res.end('{"result":"success"}');
+            });
+            endDB();
+
+
+          } else {
+            res.status(400);
+            res.end('{"result":"fail"}');
+          }
+        });
+        endDB();
+      } else {
+        res.status(400);
+        res.end('{"result":"fail"}');
+      }
+    });
+    endDB();
+  });
+});
+
+
+
+//[GET] API/V1/getcomment
+app.get(endPointRoot+'getcomment/:name/:postnumber', function (req, res) {
+  getcommentCounter++;
+
+  //check if the user account exists that wants to get a post
+  startDB();
+  const retrieveUserAccountQuery = "SELECT * FROM useraccounts WHERE name = '"+req.params.name+"'";
+  db.query(retrieveUserAccountQuery, (errUA,resultUA,fieldsUA)=>{
+    if (errUA) throw errUA;
+    console.log(retrieveUserAccountQuery);
+    
+    //only get if the account exists
+    let foundUserAccount=resultUA.length > 0;
+    if(foundUserAccount){
+      //get the account id
+      let accountID = resultUA[0].id;
+
+
+      //get all of the posts that user has made
+      startDB();
+      const retrieveUserPostsQuery = "SELECT * FROM userposts WHERE accountid = '"+accountID+"'";
+      db.query(retrieveUserPostsQuery, (errUP,resultUP,fieldsUP)=>{
+        if (errUP) throw errUP;
+        console.log(retrieveUserPostsQuery);
+
+        //check if the post exists
+        if(req.params.postnumber<resultUP.length)
+        {
+          let getPostID = resultUP[req.params.postnumber].id;
+
+          startDB();
+          const getUserPostQuery = "SELECT * FROM userposts WHERE id="+getPostID;
+          db.query(getUserPostQuery, (err,result)=>{
+            if (err) throw err;
+            //console.log("Record Inserted Into 'answers'");
+            console.log(getUserPostQuery);
+
+            if(result.length>0){
+              res.end('{"result":"success", "title":"'+result[0].title+', "body":"'+result[0].body+'"}');
+            }else{
+              res.status(400);
+              res.end('{"result":"fail"}');
+            }
+          });
+          endDB();
+        } else {
+          res.status(400);
+          res.end('{"result":"fail"}');
+        }
+      });
+      endDB();
+    } else {
+      res.status(400);
+      res.end('{"result":"fail"}');
+    }
+  });
+  endDB();
+});
+
+
+
+
+//[DELETE] API/V1/deletecomment
+app.delete(endPointRoot+'deletecomment', function (req, res) {
+  deletecommentCounter++;
+
+  let body="";
+  req.on('data', function(chunk){
+    if(chunk != null){
+      body +=chunk;
+    //console.log(body);
+    }
+  });
+
+  req.on('end', function(){
+    let jsonBody = JSON.parse(body);
+
+    //check if the user account exists that wants to delete a post
+    startDB();
+    const retrieveUserAccountQuery = "SELECT * FROM useraccounts WHERE name = '"+jsonBody.name+"'";
+    db.query(retrieveUserAccountQuery, (errUA,resultUA,fieldsUA)=>{
+      if (errUA) throw errUA;
+      console.log(retrieveUserAccountQuery);
+      
+      //only delete if the account exists
+      let foundUserAccount=resultUA.length > 0;
+      if(foundUserAccount){
+        //get the account id
+        let accountID = resultUA[0].id;
+
+
+        //get all of the posts that user has made
+        startDB();
+        const retrieveUserPostsQuery = "SELECT * FROM userposts WHERE accountid = '"+accountID+"'";
+        db.query(retrieveUserPostsQuery, (errUP,resultUP,fieldsUP)=>{
+          if (errUP) throw errUP;
+          console.log(retrieveUserPostsQuery);
+
+          //check if the post exists
+          if(jsonBody.postnumber<resultUP.length)
+          {
+            let deletePostID = resultUP[jsonBody.postnumber].id;
+
+            startDB();
+            const deleteUserPostQuery = "DELETE FROM userposts WHERE id="+deletePostID;
+            db.query(deleteUserPostQuery, (err,result)=>{
+              if (err) throw err;
+              //console.log("Record Inserted Into 'answers'");
+              console.log(deleteUserPostQuery);
+
+              res.end('{"result":"success"}');
+            });
+            endDB();
+
+
+          } else {
+            res.status(400);
+            res.end('{"result":"fail"}');
+          }
+        });
+        endDB();
+      } else {
+        res.status(400);
+        res.end('{"result":"fail"}');
+      }
+    });
+    endDB();
+  });
+});
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// USER DATA
+///////////////////////////////////////////////////////////////////////////////////////////
+
+//[GET] API/V1/users
+app.get(endPointRoot+'users', function (req, res) {
+  usersCounter++;
+
+  //get all of the user accounts
+  startDB();
+  const retrieveUserAccountQuery = "SELECT * FROM useraccounts";
+  db.query(retrieveUserAccountQuery, (errUA,resultUA,fieldsUA)=>{
+    if (errUA) throw errUA;
+    console.log(retrieveUserAccountQuery);
+    
+    let userAccountArray = [];
+    let i;
+    for(i=0;i<resultUA.length;i++){
+      userAccountArray.push(resultUA[i].name);
+    }
+
+    let responcePacket = {
+      result:"success",
+      names:userAccountArray
+    }
+
+      res.end(JSON.stringify(responcePacket));
+
+  });
+
+  endDB();
+});
+
+
+
+
+//[GET] API/V1/postcount/:name
+app.get(endPointRoot+'postcount/:name', function (req, res) {
+  postcountCounter++;
+
+  //check if the user account exists that wants to get a post
+  startDB();
+  const retrieveUserAccountQuery = "SELECT * FROM useraccounts WHERE name = '"+req.params.name+"'";
+  db.query(retrieveUserAccountQuery, (errUA,resultUA,fieldsUA)=>{
+    if (errUA) throw errUA;
+    console.log(retrieveUserAccountQuery);
+    
+    //only get if the account exists
+    let foundUserAccount=resultUA.length > 0;
+    if(foundUserAccount){
+      //get the account id
+      let accountID = resultUA[0].id;
+
+
+      //get all of the posts that user has made
+      startDB();
+      const retrieveUserPostsQuery = "SELECT * FROM userposts WHERE accountid = '"+accountID+"'";
+      db.query(retrieveUserPostsQuery, (errUP,resultUP,fieldsUP)=>{
+        if (errUP) throw errUP;
+        console.log(retrieveUserPostsQuery);
+
+        res.end('{"result":"success", "postcount":'+resultUP.length+'}');
+      });
+      endDB();
+    } else {
+      res.status(400);
+      res.end('{"result":"fail"}');
+    }
+  });
+  endDB();
+});
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// ADMIN DATA
+///////////////////////////////////////////////////////////////////////////////////////////
+
+//[POST] API/V1/adminlog
+app.post(endPointRoot+'adminlog', function (req, res, next) {
+  adminlogCounter++;
+
+
+  let body="";
+  req.on('data', function(chunk){
+    if(chunk != null){
+      body +=chunk;
+    //console.log(body);
+    }
+  });
+
+  req.on('end', function(){
+    let jsonBody = JSON.parse(body);
+
+
+
+    startDB();
+    const retrieveAdminAccountsQuery = "SELECT * FROM adminaccounts WHERE name = '"+jsonBody.name+"' AND password = '"+md5.MD5(jsonBody.password)+"'";
+    db.query(retrieveAdminAccountsQuery, (errAA,resultAA,fieldsAA)=>{
+       if (errAA) throw errAA;
+      console.log(retrieveAdminAccountsQuery);
+      //console.log("LENGTH: " + resultAA.length);
+      //check if the name and password are right
+      if(resultAA.length>0){
+        let responcePacket = {
+          result:"success",
+          createaccountCounter:createaccountCounter,
+          deleteaccountCounter:deleteaccountCounter,
+          loginaccountCounter:loginaccountCounter,
+          getcommentCounter:getcommentCounter,
+          newcommentCounter:newcommentCounter,
+          editcommentCounter:editcommentCounter,
+          deletecommentCounter:deletecommentCounter,
+          adminlogCounter:adminlogCounter,
+          usersCounter:usersCounter,
+          postcountCounter:postcountCounter
+        };
+      
+        res.end(JSON.stringify(responcePacket));
+      } else {
+        res.status(400);
+        res.end('{"result":"fail"}');
+      }
+
+    });
+    endDB();
+  });
+});
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// INTIAL TABLE SETUP
+///////////////////////////////////////////////////////////////////////////////////////////
+startDB();
+
+
+//drop userposts table
+const dropUserPostsTableQuery = "DROP TABLE IF EXISTS userposts";
+db.query(dropUserPostsTableQuery, (err,result)=>{
+	if (err) throw err;
+	console.log(dropUserPostsTableQuery);
+});
+
+
+//drop useraccounts table
+const dropUserAccountsTableQuery = "DROP TABLE IF EXISTS useraccounts";
+db.query(dropUserAccountsTableQuery, (err,result)=>{
+	if (err) throw err;
+	console.log(dropUserAccountsTableQuery);
+});
+
+//drop adminaccounts table
+const dropAdminAccountsTableQuery = "DROP TABLE IF EXISTS adminaccounts";
+db.query(dropAdminAccountsTableQuery, (err,result)=>{
+	if (err) throw err;
+	console.log(dropAdminAccountsTableQuery);
+});
+
+
+
+
+//Create the useraccounts table
+const createUserAccountsTableQuery = [
+	'CREATE TABLE IF NOT EXISTS useraccounts',
+	'(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,',
+	'name VARCHAR(40) NOT NULL,',
+	'password VARCHAR(40) NOT NULL)'
+].join(' ');
+db.query(createUserAccountsTableQuery, (err,result)=>{
+	if (err) throw err;
+	console.log(createUserAccountsTableQuery);
+});
+
+//Create the adminaccounts table
+const createAdminAccountsTableQuery = [
+	'CREATE TABLE IF NOT EXISTS adminaccounts',
+	'(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,',
+	'name VARCHAR(40) NOT NULL,',
+	'password VARCHAR(40) NOT NULL)'
+].join(' ');
+db.query(createAdminAccountsTableQuery, (err,result)=>{
+	if (err) throw err;
+	console.log(createAdminAccountsTableQuery);
+});
+
+
+
+//Create the userposts table
+const createUserPostsTableQuery = [
+	'CREATE TABLE IF NOT EXISTS userposts',
+	'(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,',
+	'accountid INT NOT NULL,',
+	'title VARCHAR(80) NOT NULL,',
+  'body VARCHAR(400) NOT NULL,',
+  'CONSTRAINT FK_USER_ACCOUNT_LINK FOREIGN KEY (accountid) REFERENCES useraccounts (id))'
+].join(' ');
+db.query(createUserPostsTableQuery, (err,result)=>{
+	if (err) throw err;
+	console.log(createUserPostsTableQuery);
+});
+
+
+
+
+//Create the admin login entry
+const insertAdminAccountQuery = "INSERT INTO adminaccounts (name, password) VALUES ('admin','"+md5.MD5("admin")+"')";
+db.query(insertAdminAccountQuery, (err,result)=>{
+  if (err) throw err;
+  console.log(insertAdminAccountQuery);
+});
+
+
+endDB();
+
+
+
+function endDB(){
+  db.end(err=>{
+    if (err) throw err;
+    //console.log("Closed database connection.");
+  })
+}
