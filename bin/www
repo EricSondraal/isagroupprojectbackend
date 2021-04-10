@@ -102,6 +102,9 @@ app.post(endPointRoot+'createaccount', function (req, res) {
 
     let jsonBody = JSON.parse(body);
 
+    //make sure the input is okay
+    jsonBody.name
+
 
     //check if the user account already exists
     startDB();
@@ -264,10 +267,10 @@ app.post(endPointRoot+'loginaccount', function (req, res) {
       //delete account if it exists AND the password is right
       let foundUserAccount=resultUA.length > 0;
       if(foundUserAccount){
-        res.status(400);
         res.setHeader('Content-Type', 'application/json');
         res.end('{"result":"success"}');
       } else {
+        res.status(400);
         res.setHeader('Content-Type', 'application/json');
         res.end('{"result":"fail"}');
       }
