@@ -14,7 +14,7 @@ const app = express();
 const mysql = require('mysql');
 const PORT = process.env.PORT || 3000;
 const endPointRoot = "/api/v1/";
-
+const apiKey = "j54G6fdguFU5vSD8b2G";
 
 //consts
 const PUT = 'PUT';
@@ -71,6 +71,12 @@ app.listen(PORT, (err)=>{
 
 
 
+//api key check
+function isAPIKeyGood(apiCheck){
+  return apiCheck === apiKey;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 // USER ACCOUNT
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +92,16 @@ app.post(endPointRoot+'createaccount', function (req, res) {
   });
 
   req.on('end', function(){
+    //api key check
+    if(!isAPIKeyGood(req.headers["x-api-key"])){
+      res.status(422);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+
     let jsonBody = JSON.parse(body);
+
 
     //check if the user account already exists
     startDB();
@@ -146,6 +161,14 @@ app.delete(endPointRoot+'deleteaccount', function (req, res) {
   });
 
   req.on('end', function(){
+    //api key check
+    if(!isAPIKeyGood(req.headers["x-api-key"])){
+      res.status(422);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+
     let jsonBody = JSON.parse(body);
 
     //check if the user account actually exists AND the password is right
@@ -212,8 +235,16 @@ app.post(endPointRoot+'loginaccount', function (req, res) {
   });
 
   req.on('end', function(){
-    let jsonBody = JSON.parse(body);
+    //api key check
+    if(!isAPIKeyGood(req.headers["x-api-key"])){
+      res.status(422);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
 
+    let jsonBody = JSON.parse(body);
+    
     //check if the user account actually exists AND the password is right
     startDB();
 
@@ -265,6 +296,14 @@ app.post(endPointRoot+'newcomment', function (req, res) {
   });
 
   req.on('end', function(){
+    //api key check
+    if(!isAPIKeyGood(req.headers["x-api-key"])){
+      res.status(422);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+
     let jsonBody = JSON.parse(body);
 
     //check if the user account exists that wants to post
@@ -325,6 +364,14 @@ app.put(endPointRoot+'editcomment', function (req, res) {
   });
 
   req.on('end', function(){
+    //api key check
+    if(!isAPIKeyGood(req.headers["x-api-key"])){
+      res.status(422);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+
     let jsonBody = JSON.parse(body);
 
     //check if the user account exists that wants to edit a post
@@ -396,6 +443,14 @@ app.put(endPointRoot+'editcomment', function (req, res) {
 
 //[GET] API/V1/getcomment
 app.get(endPointRoot+'getcomment/:name/:postnumber', function (req, res) {
+  //api key check
+  if(!isAPIKeyGood(req.headers["x-api-key"])){
+    res.status(422);
+    res.setHeader('Content-Type', 'application/json');
+    res.end('{"result":"fail"}');
+    return;
+  }
+
   //check if the user account exists that wants to get a post
   startDB();
 
@@ -478,6 +533,14 @@ app.delete(endPointRoot+'deletecomment', function (req, res) {
   });
 
   req.on('end', function(){
+    //api key check
+    if(!isAPIKeyGood(req.headers["x-api-key"])){
+      res.status(422);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+
     let jsonBody = JSON.parse(body);
 
     //check if the user account exists that wants to delete a post
@@ -554,6 +617,14 @@ app.delete(endPointRoot+'deletecomment', function (req, res) {
 
 //[GET] API/V1/users
 app.get(endPointRoot+'users', function (req, res) {
+  //api key check
+  if(!isAPIKeyGood(req.headers["x-api-key"])){
+    res.status(422);
+    res.setHeader('Content-Type', 'application/json');
+    res.end('{"result":"fail"}');
+    return;
+  }
+
   //get all of the user accounts
   startDB();
 
@@ -594,6 +665,14 @@ app.get(endPointRoot+'users', function (req, res) {
 
 //[GET] API/V1/postcount/:name
 app.get(endPointRoot+'postcount/:name', function (req, res) {
+  //api key check
+  if(!isAPIKeyGood(req.headers["x-api-key"])){
+    res.status(422);
+    res.setHeader('Content-Type', 'application/json');
+    res.end('{"result":"fail"}');
+    return;
+  }
+
   //check if the user account exists that wants to get a post
   startDB();
 
@@ -655,6 +734,14 @@ app.post(endPointRoot+'adminlog', cors(),function (req, res, next) {
   });
 
   req.on('end', function(){
+    //api key check
+    if(!isAPIKeyGood(req.headers["x-api-key"])){
+      res.status(422);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+
     let jsonBody = JSON.parse(body);
 
 
