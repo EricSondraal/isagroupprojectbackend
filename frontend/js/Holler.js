@@ -45,7 +45,7 @@ function Holler(postNum, user, title, body, isPersonal) {
     this.delete = () => {
         let postObject = {
             name: this.user,
-            postNumber: this.postNum
+            postnumber: this.postNum
         };
         let xmlDelete = new XMLHttpRequest();
         xmlDelete.open("DELETE", `${apiURL}deletecomment`);
@@ -56,6 +56,6 @@ function Holler(postNum, user, title, body, isPersonal) {
                 location.reload();
             }
         }
-        xmlDelete.send(JSON.stringify(accountInfo));
+        xmlDelete.send(JSON.stringify(postObject));
     }
 }

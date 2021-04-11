@@ -19,7 +19,6 @@ window.addEventListener('DOMContentLoaded', () => {
         </ul>`;
         document.getElementById("newHollerForm").onsubmit = submitHoller;
         getHollers();
-        showHollers();
     }
 });
 
@@ -71,7 +70,8 @@ function getHollers() {
                 xmlGetHoller.onreadystatechange = () => {
                     if (xmlGetHoller.readyState === XMLHttpRequest.DONE && xmlGetHoller.status === 200){
                         let response = JSON.parse(xmlGetHoller.responseText);
-                        hollers.push(new Holler(i, username, response.title, response.body, true));
+                        let h = new Holler(i, username, response.title, response.body, true);
+                        myHollers.appendChild(h.display());
                     }
                 }
                 xmlGetHoller.send();
@@ -79,11 +79,5 @@ function getHollers() {
         } else {
             myHollers.innerHTML = "No Hollers";
         }
-    });
-}
-
-function showHollers(){
-    hollers.forEach(element => {
-        document.getElementById("hollerSpace").appendChild(element.display());
     });
 }
