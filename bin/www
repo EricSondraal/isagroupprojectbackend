@@ -612,7 +612,7 @@ app.get(endPointRoot+'getcomment/:name/:postnumber', function (req, res) {
 
             if(result.length>0){
               res.setHeader('Content-Type', 'application/json');
-              res.end('{"result":"success", "title":"'+result[0].title+', "body":"'+result[0].body+'"}');
+              res.end('{"result":"success", "title":"'+result[0].title+'", "body":"'+result[0].body+'"}');
             }else{
               res.status(400);
               res.setHeader('Content-Type', 'application/json');
