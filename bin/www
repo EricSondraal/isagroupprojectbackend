@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+console.log(typeof 5);
 /**
  * Module dependencies.
  */
@@ -116,7 +116,7 @@ app.post(endPointRoot+'createaccount', function (req, res) {
     }
     
     //make sure the input is okay
-    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.password === 'undefined')){
+    if((typeof jsonBody.name !== 'string') || (typeof jsonBody.password !== 'string')){
       res.status(406);
       res.setHeader('Content-Type', 'application/json');
       res.end('{"result":"fail"}');
@@ -202,7 +202,7 @@ app.delete(endPointRoot+'deleteaccount', function (req, res) {
     }
     
     //make sure the input is okay
-    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.password === 'undefined')){
+    if((typeof jsonBody.name !== 'string') || (typeof jsonBody.password !== 'string')){
       res.status(406);
       res.setHeader('Content-Type', 'application/json');
       res.end('{"result":"fail"}');
@@ -295,7 +295,7 @@ app.post(endPointRoot+'loginaccount', function (req, res) {
     }
     
     //make sure the input is okay
-    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.password === 'undefined')){
+    if((typeof jsonBody.name !== 'string') || (typeof jsonBody.password !== 'string')){
       res.status(406);
       res.setHeader('Content-Type', 'application/json');
       res.end('{"result":"fail"}');
@@ -375,7 +375,7 @@ app.post(endPointRoot+'newcomment', function (req, res) {
     }
     
     //make sure the input is okay
-    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.title === 'undefined') || (typeof jsonBody.body === 'undefined')){
+    if((typeof jsonBody.name !== 'string') || (typeof jsonBody.title !== 'string') || (typeof jsonBody.body !== 'string')){
       res.status(406);
       res.setHeader('Content-Type', 'application/json');
       res.end('{"result":"fail"}');
@@ -465,7 +465,7 @@ app.put(endPointRoot+'editcomment', function (req, res) {
     
 
     //make sure the input is okay
-    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.postnumber === 'undefined') || (typeof jsonBody.title === 'undefined') || (typeof jsonBody.body === 'undefined')){
+    if((typeof jsonBody.name !== 'string') || (typeof jsonBody.postnumber !== 'number') || (typeof jsonBody.title !== 'string') || (typeof jsonBody.body !== 'string')){
       res.status(406);
       res.setHeader('Content-Type', 'application/json');
       res.end('{"result":"fail"}');
@@ -556,7 +556,7 @@ app.get(endPointRoot+'getcomment/:name/:postnumber', function (req, res) {
 
   
   //make sure the input is okay
-  if((typeof req.params.name === 'undefined') || (typeof req.params.postnumber === 'undefined')){
+  if((typeof req.params.name !== 'string') || (typeof req.params.postnumber !== 'string')){
     res.status(406);
     res.setHeader('Content-Type', 'application/json');
     res.end('{"result":"fail"}');
@@ -670,7 +670,7 @@ app.delete(endPointRoot+'deletecomment', function (req, res) {
     }
     
     //make sure the input is okay
-    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.postnumber === 'undefined')){
+    if((typeof jsonBody.name !== 'string') || (typeof jsonBody.postnumber !== 'number')){
       res.status(406);
       res.setHeader('Content-Type', 'application/json');
       res.end('{"result":"fail"}');
@@ -815,7 +815,7 @@ app.get(endPointRoot+'postcount/:name', function (req, res) {
 
 
   //make sure the input is okay
-  if(typeof req.params.name === 'undefined'){
+  if(typeof req.params.name !== 'string'){
     res.status(406);
     res.setHeader('Content-Type', 'application/json');
     res.end('{"result":"fail"}');
@@ -906,7 +906,7 @@ app.post(endPointRoot+'adminlog', cors(),function (req, res, next) {
     }
     
     //make sure the input is okay
-    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.password === 'undefined')){
+    if((typeof jsonBody.name !== 'string') || (typeof jsonBody.password !== 'string')){
       res.status(406);
       res.setHeader('Content-Type', 'application/json');
       res.end('{"result":"fail"}');
