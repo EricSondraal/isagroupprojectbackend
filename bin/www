@@ -76,6 +76,11 @@ function isAPIKeyGood(apiCheck){
   return apiCheck === apiKey;
 }
 
+function replaceAll(string, search, replace) {
+  string+='';
+  return string.split(search).join(replace);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // USER ACCOUNT
@@ -100,11 +105,25 @@ app.post(endPointRoot+'createaccount', function (req, res) {
       return;
     }
 
-    let jsonBody = JSON.parse(body);
-
+    let jsonBody;
+    try{
+      jsonBody = JSON.parse(body);
+    } catch(err){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    
     //make sure the input is okay
-    jsonBody.name
-
+    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.password === 'undefined')){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    //don't allow '`"
+    jsonBody.name=replaceAll(replaceAll(replaceAll(jsonBody.name,"'",""),"`",""),`"`,"");
 
     //check if the user account already exists
     startDB();
@@ -172,7 +191,26 @@ app.delete(endPointRoot+'deleteaccount', function (req, res) {
       return;
     }
 
-    let jsonBody = JSON.parse(body);
+    let jsonBody;
+    try{
+      jsonBody = JSON.parse(body);
+    } catch(err){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    
+    //make sure the input is okay
+    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.password === 'undefined')){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    //don't allow '`"
+    jsonBody.name=replaceAll(replaceAll(replaceAll(jsonBody.name,"'",""),"`",""),`"`,"");
+
 
     //check if the user account actually exists AND the password is right
     startDB();
@@ -246,7 +284,26 @@ app.post(endPointRoot+'loginaccount', function (req, res) {
       return;
     }
 
-    let jsonBody = JSON.parse(body);
+    let jsonBody;
+    try{
+      jsonBody = JSON.parse(body);
+    } catch(err){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    
+    //make sure the input is okay
+    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.password === 'undefined')){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    //don't allow '`"
+    jsonBody.name=replaceAll(replaceAll(replaceAll(jsonBody.name,"'",""),"`",""),`"`,"");
+
     
     //check if the user account actually exists AND the password is right
     startDB();
@@ -307,7 +364,28 @@ app.post(endPointRoot+'newcomment', function (req, res) {
       return;
     }
 
-    let jsonBody = JSON.parse(body);
+    let jsonBody;
+    try{
+      jsonBody = JSON.parse(body);
+    } catch(err){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    
+    //make sure the input is okay
+    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.title === 'undefined') || (typeof jsonBody.body === 'undefined')){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    //don't allow '`"
+    jsonBody.name=replaceAll(replaceAll(replaceAll(jsonBody.name,"'",""),"`",""),`"`,"");
+    jsonBody.title=replaceAll(replaceAll(replaceAll(jsonBody.title,"'",""),"`",""),`"`,"");
+    jsonBody.body=replaceAll(replaceAll(replaceAll(jsonBody.body,"'",""),"`",""),`"`,"");
+
 
     //check if the user account exists that wants to post
     startDB();
@@ -375,7 +453,29 @@ app.put(endPointRoot+'editcomment', function (req, res) {
       return;
     }
 
-    let jsonBody = JSON.parse(body);
+    let jsonBody;
+    try{
+      jsonBody = JSON.parse(body);
+    } catch(err){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    
+
+    //make sure the input is okay
+    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.postnumber === 'undefined') || (typeof jsonBody.title === 'undefined') || (typeof jsonBody.body === 'undefined')){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    //don't allow '`"
+    jsonBody.name=replaceAll(replaceAll(replaceAll(jsonBody.name,"'",""),"`",""),`"`,"");
+    jsonBody.postnumber=replaceAll(replaceAll(replaceAll(jsonBody.postnumber,"'",""),"`",""),`"`,"");
+    jsonBody.title=replaceAll(replaceAll(replaceAll(jsonBody.title,"'",""),"`",""),`"`,"");
+    jsonBody.body=replaceAll(replaceAll(replaceAll(jsonBody.body,"'",""),"`",""),`"`,"");
 
     //check if the user account exists that wants to edit a post
     startDB();
@@ -453,6 +553,20 @@ app.get(endPointRoot+'getcomment/:name/:postnumber', function (req, res) {
     res.end('{"result":"fail"}');
     return;
   }
+
+  
+  //make sure the input is okay
+  if((typeof req.params.name === 'undefined') || (typeof req.params.postnumber === 'undefined')){
+    res.status(406);
+    res.setHeader('Content-Type', 'application/json');
+    res.end('{"result":"fail"}');
+    return;
+  }
+  //don't allow '`"
+  req.params.name = replaceAll(replaceAll(replaceAll(req.params.name,"'",""),"`",""),`"`,"");
+  req.params.postnumber = replaceAll(replaceAll(replaceAll(req.params.postnumber,"'",""),"`",""),`"`,"");
+
+
 
   //check if the user account exists that wants to get a post
   startDB();
@@ -544,7 +658,28 @@ app.delete(endPointRoot+'deletecomment', function (req, res) {
       return;
     }
 
-    let jsonBody = JSON.parse(body);
+
+    let jsonBody;
+    try{
+      jsonBody = JSON.parse(body);
+    } catch(err){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    
+    //make sure the input is okay
+    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.postnumber === 'undefined')){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    //don't allow '`"
+    jsonBody.name=replaceAll(replaceAll(replaceAll(jsonBody.name,"'",""),"`",""),`"`,"");
+    jsonBody.postnumber=replaceAll(replaceAll(replaceAll(jsonBody.postnumber,"'",""),"`",""),`"`,"");
+
 
     //check if the user account exists that wants to delete a post
     startDB();
@@ -628,6 +763,8 @@ app.get(endPointRoot+'users', function (req, res) {
     return;
   }
 
+  
+
   //get all of the user accounts
   startDB();
 
@@ -675,6 +812,18 @@ app.get(endPointRoot+'postcount/:name', function (req, res) {
     res.end('{"result":"fail"}');
     return;
   }
+
+
+  //make sure the input is okay
+  if(typeof req.params.name === 'undefined'){
+    res.status(406);
+    res.setHeader('Content-Type', 'application/json');
+    res.end('{"result":"fail"}');
+    return;
+  }
+  //don't allow '`"
+  req.params.name = replaceAll(replaceAll(replaceAll(req.params.name,"'",""),"`",""),`"`,"");
+
 
   //check if the user account exists that wants to get a post
   startDB();
@@ -745,7 +894,27 @@ app.post(endPointRoot+'adminlog', cors(),function (req, res, next) {
       return;
     }
 
-    let jsonBody = JSON.parse(body);
+
+    let jsonBody;
+    try{
+      jsonBody = JSON.parse(body);
+    } catch(err){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    
+    //make sure the input is okay
+    if((typeof jsonBody.name === 'undefined') || (typeof jsonBody.password === 'undefined')){
+      res.status(406);
+      res.setHeader('Content-Type', 'application/json');
+      res.end('{"result":"fail"}');
+      return;
+    }
+    //don't allow '`"
+    jsonBody.name=replaceAll(replaceAll(replaceAll(jsonBody.name,"'",""),"`",""),`"`,"");
+
 
 
 
