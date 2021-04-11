@@ -1,4 +1,5 @@
 let hollers = [];
+let promises = [];
 
 window.addEventListener('DOMContentLoaded', getHollers);
 
@@ -25,9 +26,9 @@ function getHollers() {
             if (xmlCount.readyState === XMLHttpRequest.DONE && xmlCount.status === 200) {
                 let response = JSON.parse(xmlCount.responseText);
                 console.log("Got counts");
-                return new Promise(resolve => {
+                promises.push(new Promise(resolve => {
                     resolve(name, response.postcount);
-                });
+                }));
 
             }
         }
