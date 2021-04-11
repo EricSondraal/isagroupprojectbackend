@@ -49,7 +49,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
         xmlCount.onreadystatechange = () =>{
             if(xmlCount.readyState === XMLHttpRequest.DONE && xmlCount.status === 200){
                 let response = JSON.parse(xmlCount.responseText);
-                console.log(response);
                 postCount.innerHTML += `<a href="./myholler.html">${response.postcount}</a>`;
             }
         }
