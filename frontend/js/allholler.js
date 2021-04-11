@@ -13,7 +13,9 @@ function getHollers() {
                 let response = JSON.parse(xmlUsers.responseText);
                 console.log("Got names");
                 response.names.forEach(name => {
-                    resolve(name);
+                    promises.push(new Promise(resolve => {
+                        
+                    }));
                 });
             }
         }
