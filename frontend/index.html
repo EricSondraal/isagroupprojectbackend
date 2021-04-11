@@ -32,6 +32,15 @@
                     <a class=" nav-link" href="./API/V1/admin.html">Admin</a>
                 </li>
             </ul>
+            <div id="navProfile">
+                <form class="form-inline my-2 my-lg-0" id="loginForm">
+                    <input class="form-control mr-sm-2" type="text" placeholder="Username" aria-label="Search"
+                        name="name">
+                    <input class="form-control mr-sm-2" type="password" placeholder="Password" aria-label="Search"
+                        name="password">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Login</button>
+                </form>
+            </div>
         </div>
     </nav>
     <div>
@@ -41,25 +50,33 @@
             <hr class="my-2">
             <p>Get started by making a Holler!</p>
             <p class="lead">
-              <a class="btn btn-primary btn-lg" href="./myholler.html" role="button">My Hollers</a>
+                <a class="btn btn-primary btn-lg" href="./myholler.html" role="button">My Hollers</a>
             </p>
         </div>
         <br>
         <div class="d-flex justify-content-around text-center">
-            <div class="p-2 flex-fill">
-                <img src="./images/icon_Profile.png" width="100">
-                <h4>Profile</h4>
-            </div>
-            <div class="p-2 flex-fill">
-                <img src="./images/icon_Profile.png" width="100">
-                <h4>Flex item</h4>
-            </div>
-            <div class="p-2 flex-fill">
-                <img src="./images/icon_List.png" width="100">
-                <h4>All Hollers</h4>
-            </div>
+            <a href="./profile.html">
+                <div class="p-2 flex-fill">
+                    <img src="./images/icon_Profile.png" width="100">
+                    <h4 class="text-decoration-none">Profile</h4>
+                </div>
+            </a>
+            <a href="./myholler.html">
+                <div class="p-2 flex-fill">
+                    <img src="./images/icon_Holler.png" width="100">
+                    <h4 class="text-decoration-none">My Hollers</h4>
+                </div>
+            </a>
+            <a href="./hollerlist.html">
+                <div class="p-2 flex-fill">
+                    <img src="./images/icon_List.png" width="100">
+                    <h4 class="text-decoration-none">All Hollers</h4>
+                </div>
+            </a>
         </div>
     </div>
+    <script src="./js/constants.js"></script>
+    <script src="./js/login.js"></script>
 </body>
 
 </html>

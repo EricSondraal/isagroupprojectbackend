@@ -29,11 +29,45 @@
                     <a class="nav-link" href="./hollerlist.html">All Hollers</a>
                 </li>
                 <li class="nav-item my-2 my-lg-0">
-                  <a class=" nav-link" href="./API/V1/admin.html">Admin</a>
+                    <a class=" nav-link" href="./API/V1/admin.html">Admin</a>
                 </li>
             </ul>
+            <div id="navProfile">
+                <form class="form-inline my-2 my-lg-0" id="loginForm">
+                    <input class="form-control mr-sm-2" type="text" placeholder="Username" aria-label="Search"
+                        name="name">
+                    <input class="form-control mr-sm-2" type="password" placeholder="Password" aria-label="Search"
+                        name="password">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Login</button>
+                </form>
+            </div>
         </div>
     </nav>
+    <br>
+    <div class="text-center">
+        <img src="./images/icon_Profile.png" width="200">
+        <div id="profileInfo">
+            <h4>Create a new account?</h4>
+            <div class="container px-4">
+                <form id="signupForm">
+                    <div class="form-group px-5">
+                        <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Username"
+                            name="name">
+                    </div>
+                    <div class="form-group px-5">
+                        <input type="password" class="form-control" id="formGroupExampleInput2" placeholder="Password"
+                            name="password">
+                    </div>
+                    <div>
+                        <button class="btn btn-primary">Sign Up</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="./js/constants.js"></script>
+    <script src="./js/login.js"></script>
+    <script src="./js/profile.js"></script>
 </body>
 
 </html>
