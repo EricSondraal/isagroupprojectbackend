@@ -66,6 +66,7 @@ document.getElementById("signupForm").onsubmit = event => {
     let xmlSignUp = new XMLHttpRequest();
     xmlSignUp.open("POST", `${apiURL}createaccount`);
     xmlSignUp.setRequestHeader('Content-Type', 'application/json');
+    xmlSignUp.setRequestHeader("x-api-key", apiKey);
     xmlSignUp.onreadystatechange = () => {
         if (xmlSignUp.readyState === XMLHttpRequest.DONE && xmlSignUp.status === 200) {
             let response = JSON.parse(xmlSignUp.responseText);
